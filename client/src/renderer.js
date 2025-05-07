@@ -8,7 +8,7 @@ const Store = require('electron-store');
 const store = new Store();
 
 // Connect to the socket.io server
-const socket = io('http://localhost:3000');
+const socket = io('https://proximity-voice-chat.onrender.com');
 // Replace the above line with your Render.com URL when deploying:
 // const socket = io('https://your-render-url-here.onrender.com');
 
