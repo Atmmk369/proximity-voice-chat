@@ -12,21 +12,6 @@ const socket = io('https://proximity-voice-chat.onrender.com');
 
 socket
 
-// Add this after creating the socket
-socket.on('connect', () => {
-  console.log('Connected to server!');
-});
-
-socket.on('connect_error', (error) => {
-  console.error('Connection error:', error);
-});
-
-// Add this to the Create Lobby button click handler
-elements.createConfirmBtn.addEventListener('click', () => {
-  console.log('Create button clicked');
-  // Rest of the code...
-});
-
 // DOM elements
 const elements = {
   // Screens
