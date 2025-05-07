@@ -8,7 +8,9 @@ const Store = require('electron-store');
 const store = new Store();
 
 // Connect to the socket.io server
-const socket = io('https://your-service-url.onrender.com');
+const socket = io('https://proximity-voice-chat.onrender.com');
+
+socket
 
 // DOM elements
 const elements = {
