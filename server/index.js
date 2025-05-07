@@ -53,6 +53,7 @@ io.on('connection', (socket) => {
       id: socket.id,
       username,
       position: { x: 500, y: 500 }, // Start in middle
+      orientation: 0, // Default orientation (0 radians = facing right)
       isMuted: false
     };
     
@@ -100,6 +101,7 @@ io.on('connection', (socket) => {
       id: socket.id,
       username,
       position: { x: 500, y: 500 }, // Start in middle
+      orientation: 0, // Default orientation
       isMuted: false
     };
     
@@ -120,6 +122,11 @@ io.on('connection', (socket) => {
     console.log(`User ${username} joined lobby: ${lobby.name} (${lobbyId})`);
   });
   
+  // Explicit leave lobby
+  socket.on('leaveLobby', ({ lobbyId }) => {
+    handleUserLeaving(socket.id, lobbyId);
+  });
+  
   // Update user position (from WASD/directional inputs or mouse)
   socket.on('updatePosition', ({ lobbyId, position }) => {
     // Verify lobby and user exist
@@ -134,6 +141,23 @@ io.on('connection', (socket) => {
     io.to(lobbyId).emit('userPositionUpdated', {
       userId: socket.id,
       position
+    });
+  });
+  
+  // Handle orientation updates
+  socket.on('updateOrientation', ({ lobbyId, orientation }) => {
+    // Verify lobby and user exist
+    if (!lobbies[lobbyId] || !lobbies[lobbyId].users[socket.id]) {
+      return;
+    }
+    
+    // Update user orientation
+    lobbies[lobbyId].users[socket.id].orientation = orientation;
+    
+    // Broadcast the updated orientation to all users in the lobby
+    io.to(lobbyId).emit('userOrientationUpdated', {
+      userId: socket.id,
+      orientation
     });
   });
   
@@ -215,46 +239,52 @@ io.on('connection', (socket) => {
     
     // Find any lobbies the user was in
     Object.keys(lobbies).forEach(lobbyId => {
-      const lobby = lobbies[lobbyId];
-      
-      if (lobby.users[socket.id]) {
-        // Remove the user
-        delete lobby.users[socket.id];
-        
-        // Notify other users
-        socket.to(lobbyId).emit('userLeft', {
-          userId: socket.id
-        });
-        
-        console.log(`User ${socket.id} removed from lobby ${lobby.name}`);
-        
-        // If the host left, either assign a new host or close the lobby
-        if (lobby.host === socket.id) {
-          const remainingUsers = Object.keys(lobby.users);
-          
-          if (remainingUsers.length > 0) {
-            // Assign a new host (first remaining user)
-            lobby.host = remainingUsers[0];
-            
-            // Notify users about the new host
-            io.to(lobbyId).emit('newHost', {
-              hostId: lobby.host
-            });
-            
-            console.log(`New host assigned in lobby ${lobby.name}: ${lobby.host}`);
-          } else {
-            // Close the lobby if no users left
-            delete lobbies[lobbyId];
-            console.log(`Lobby closed: ${lobby.name} (${lobbyId})`);
-          }
-        }
-        
-        // Update public lobbies list
-        io.emit('lobbiesUpdated', getPublicLobbies());
+      if (lobbies[lobbyId].users[socket.id]) {
+        handleUserLeaving(socket.id, lobbyId);
       }
     });
   });
 });
+
+// Create a reusable function for handling user leaving (for both disconnect and explicit leave)
+function handleUserLeaving(userId, lobbyId) {
+  const lobby = lobbies[lobbyId];
+  if (!lobby || !lobby.users[userId]) return;
+  
+  // Remove the user
+  delete lobby.users[userId];
+  
+  // Notify other users
+  io.to(lobbyId).emit('userLeft', {
+    userId: userId
+  });
+  
+  console.log(`User ${userId} left lobby ${lobby.name}`);
+  
+  // If the host left, either assign a new host or close the lobby
+  if (lobby.host === userId) {
+    const remainingUsers = Object.keys(lobby.users);
+    
+    if (remainingUsers.length > 0) {
+      // Assign a new host (first remaining user)
+      lobby.host = remainingUsers[0];
+      
+      // Notify users about the new host
+      io.to(lobbyId).emit('newHost', {
+        hostId: lobby.host
+      });
+      
+      console.log(`New host assigned in lobby ${lobby.name}: ${lobby.host}`);
+    } else {
+      // Close the lobby if no users left
+      delete lobbies[lobbyId];
+      console.log(`Lobby closed: ${lobby.name} (${lobbyId})`);
+    }
+  }
+  
+  // Update public lobbies list
+  io.emit('lobbiesUpdated', getPublicLobbies());
+}
 
 // Helper function to get public lobbies for the lobby browser
 function getPublicLobbies() {
