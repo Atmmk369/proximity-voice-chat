@@ -1,0 +1,15 @@
+# Dependency directories 
+node_modules/ 
+*/node_modules/ 
+npm-debug.log 
+# Build outputs 
+dist/ 
+*/dist/ 
+build/ 
+# Electron specific 
+client/node_modules/electron/ 
+# Environment files  
+.env 
+# OS specific files 
+.DS_Store 
+Thumbs.db 

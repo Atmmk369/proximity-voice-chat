@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Proximity Voice Chat</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <div id="login-screen" class="screen active">
+      <h1>Proximity Voice Chat</h1>
+      <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" placeholder="Enter your username">
+      </div>
+      <div class="button-group">
+        <button id="create-lobby-btn">Create Lobby</button>
+        <button id="join-lobby-btn">Join Lobby</button>
+      </div>
+    </div>
+
+    <div id="create-lobby-screen" class="screen">
+      <h1>Create New Lobby</h1>
+      <div class="form-group">
+        <label for="lobby-name">Lobby Name:</label>
+        <input type="text" id="lobby-name" placeholder="Enter lobby name">
+      </div>
+      <div class="form-group">
+        <label for="lobby-password">Password (optional):</label>
+        <input type="password" id="lobby-password" placeholder="Leave empty for public lobby">
+      </div>
+      <div class="button-group">
+        <button id="create-confirm-btn">Create</button>
+        <button id="create-back-btn">Back</button>
+      </div>
+    </div>
+
+    <div id="join-lobby-screen" class="screen">
+      <h1>Join Lobby</h1>
+      <div id="lobbies-list" class="lobbies-container">
+        <!-- Lobbies will be populated here dynamically -->
+        <div class="no-lobbies">No public lobbies available</div>
+      </div>
+      <div class="form-group">
+        <label for="join-lobby-id">Or enter Lobby ID:</label>
+        <input type="text" id="join-lobby-id" placeholder="Enter lobby ID">
+      </div>
+      <div class="form-group">
+        <label for="join-lobby-password">Password (if required):</label>
+        <input type="password" id="join-lobby-password" placeholder="Enter password if needed">
+      </div>
+      <div class="button-group">
+        <button id="join-confirm-btn">Join</button>
+        <button id="join-back-btn">Back</button>
+      </div>
+    </div>
+
+    <div id="lobby-screen" class="screen">
+      <div class="lobby-container">
+        <div class="lobby-header">
+          <h2 id="lobby-title">Lobby Name</h2>
+          <div id="lobby-id-display">ID: <span id="lobby-id"></span></div>
+          <button id="minimize-btn" class="minimize-btn">Minimize to Tray</button>
+          <button id="leave-lobby-btn">Leave Lobby</button>
+        </div>
+        
+        <div class="lobby-content">
+          <div class="lobby-visualization">
+            <canvas id="lobby-canvas" width="800" height="600"></canvas>
+            <div class="canvas-instructions">Click on the canvas to enable mouse tracking</div>
+          </div>
+          
+          <div class="lobby-sidebar">
+            <div class="users-panel">
+              <h3>Users</h3>
+              <div id="users-list" class="users-container">
+                <!-- Users will be populated here dynamically -->
+              </div>
+            </div>
+            
+            <div id="host-controls" class="host-controls">
+              <h3>Host Controls</h3>
+              <div class="form-group">
+                <label for="box-size">Box Size:</label>
+                <input type="range" id="box-size" min="500" max="2000" value="1000">
+                <span id="box-size-value">1000px</span>
+              </div>
+              <div class="form-group">
+                <label for="voice-radius">Voice Radius:</label>
+                <input type="range" id="voice-radius" min="50" max="500" value="200">
+                <span id="voice-radius-value">200px</span>
+              </div>
+              <div class="form-group">
+                <label for="max-users">Max Users:</label>
+                <input type="range" id="max-users" min="2" max="20" value="10">
+                <span id="max-users-value">10</span>
+              </div>
+              <div class="form-group">
+                <label for="mouse-sensitivity">Mouse Sensitivity:</label>
+                <input type="range" id="mouse-sensitivity" min="0" max="100" value="50">
+                <span id="mouse-sensitivity-value">50</span>
+                <div class="sensitivity-note">Set to 0 to disable mouse tracking</div>
+              </div>
+              <div class="form-group checkbox-group">
+                <input type="checkbox" id="enable-keyboard" checked>
+                <label for="enable-keyboard">Enable Keyboard Controls</label>
+              </div>
+              <div class="form-group checkbox-group">
+                <input type="checkbox" id="lobby-public" checked>
+                <label for="lobby-public">Public Lobby</label>
+              </div>
+              <div class="form-group">
+                <label for="host-password">Password:</label>
+                <input type="password" id="host-password" placeholder="Set password for private lobby">
+              </div>
+              <button id="boom-voice-btn">Boom Voice (Alt+B)</button>
+              <div id="boom-indicator" class="hidden">BOOM VOICE ACTIVE</div>
+            </div>
+            
+            <div class="user-settings">
+              <h3>User Settings</h3>
+              <div class="form-group checkbox-group">
+                <input type="checkbox" id="minimize-to-tray">
+                <label for="minimize-to-tray">Minimize to Tray when Closed</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden audio elements container for voice chat -->
+  <div id="audio-elements" style="display: none;"></div>
+
+  <!-- Scripts -->
+  <script src="renderer.js"></script>
+</body>
+</html>
