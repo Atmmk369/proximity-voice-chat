@@ -46,12 +46,18 @@ function createWindow() {
     mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show();
   });
 
-  // Handle close event (minimize to tray instead of closing)
+  // Handle window close event properly
   mainWindow.on('close', (event) => {
     if (!app.isQuitting) {
+      // If just minimizing to tray
       event.preventDefault();
       mainWindow.hide();
       return false;
+    } else {
+      // If actually quitting, send disconnect signal
+      mainWindow.webContents.send('app-closing');
+      // Give time for the disconnect message to be sent
+      setTimeout(() => {}, 300);
     }
     return true;
   });
@@ -85,8 +91,18 @@ ipcMain.on('minimize-to-tray', () => {
   mainWindow.hide();
 });
 
-// Clean up before quitting
+// Add this to handle app quit properly
 app.on('before-quit', () => {
   app.isQuitting = true;
+  // Signal to renderer process to clean up
+  if (mainWindow) {
+    mainWindow.webContents.send('app-closing');
+  }
+  // Allow time for cleanup
+  setTimeout(() => {}, 300);
+});
+
+// Clean up before quitting
+app.on('will-quit', () => {
   globalShortcut.unregisterAll();
 });
